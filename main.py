@@ -1,6 +1,4 @@
-"""
-FastAPI Backend for Resume-JD Matcher - FIXED TOKEN ISSUE
-"""
+
 
 from fastapi import FastAPI, File, UploadFile, HTTPException, Form, Query
 from fastapi.responses import FileResponse
