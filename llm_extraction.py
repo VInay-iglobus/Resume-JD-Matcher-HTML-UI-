@@ -1,8 +1,3 @@
-"""
-LLM Extraction Module - FIXED VERSION
-Better prompts + aggressive extraction for accurate data
-"""
-
 import json
 import re
 from datetime import datetime
