@@ -1,8 +1,3 @@
-"""
-Matching Engine - FIXED VERSION
-Better handling of edge cases and empty data
-"""
-
 from difflib import SequenceMatcher
 import logging
 import re
