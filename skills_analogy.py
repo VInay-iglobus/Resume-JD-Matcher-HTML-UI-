@@ -6,8 +6,7 @@ Contains:
 3. EDUCATION_HIERARCHY - Education degree levels
 4. ASSESSMENT_THRESHOLDS - Match scoring thresholds
 
-Easily update and maintain skill/role relationships
-Last Updated: 2024
+
 """
 
 # ===== PROGRAMMING LANGUAGES =====
