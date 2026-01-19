@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume-JD Matcher | AI-Powered Matching Engine</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --danger: #ef4444;
+            --border: #e5e7eb;
+            --text: #374151;
+            --text-light: #6b7280;
+            --transition: all 0.3s;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .login-box {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 420px;
+            padding: 2.5rem;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: var(--transition);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-submit {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 1.5rem;
+        }
+
+        .form-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(99, 102, 241, 0.3);
+        }
+
+        .form-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .toggle-link {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .toggle-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .form-message {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .form-message.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #7f1d1d;
+            display: block;
+        }
+
+        .form-message.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #065f46;
+            display: block;
+        }
+
+        .app-hidden { display: none; }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .user-name {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            padding: 0.5rem 1.5rem;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            font-weight: 800;
+        }
+
+        .upload-section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+        }
+
+        .upload-card {
+            background: #f9fafb;
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .upload-card:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .file-input { display: none; }
+
+        .upload-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .upload-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            min-height: 200px;
+            margin-top: 0.5rem;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            color: var(--text);
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn-primary {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            padding: 1rem 2rem;
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .loading-container {
+            display: none;
+            text-align: center;
+            padding: 3rem;
+            color: white;
+        }
+
+        .loading-container.show {
+            display: block;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .results-section {
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+        }
+
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 12px 12px 0 0;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 1.25rem;
+            background: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            color: var(--text-light);
+            transition: var(--transition);
+        }
+
+        .tab-btn.active {
+            border-bottom-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 2rem;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.1);
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .score-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .score-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .score-label {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+        }
+
+        .message {
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid var(--danger);
+            color: #7f1d1d;
+        }
+
+        .message.success {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid var(--success);
+            color: #065f46;
+        }
+
+        .file-info {
+            background: rgba(16, 185, 129, 0.1);
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: #065f46;
+        }
+
+        .data-section {
+            margin-bottom: 2rem;
+            background: #f9fafb;
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+
+        .data-section h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .data-item {
+            padding: 0.5rem 0;
+            font-size: 0.875rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-item:last-child {
+            border-bottom: none;
+        }
+
+        .skill-tag {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            margin: 0.25rem;
+            font-size: 0.75rem;
+        }
+
+        .mode-toggle {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+        }
+
+        .mode-btn {
+            padding: 0.75rem 2rem;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .mode-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .batch-section {
+            display: none;
+        }
+
+        .batch-section.show {
+            display: block;
+        }
+
+        .single-section {
+            display: block;
+        }
+
+        .single-section.hide {
+            display: none;
+        }
+
+        .file-list {
+            background: #f9fafb;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            border-left: 3px solid var(--primary);
+        }
+
+        .file-item-name {
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: var(--text);
+        }
+
+        .file-remove-btn {
+            padding: 0.25rem 0.75rem;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .file-remove-btn:hover {
+            background: #dc2626;
+        }
+
+        .batch-upload-card {
+            background: #f9fafb;
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .batch-upload-card:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .batch-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+            font-size: 0.875rem;
+        }
+
+        .results-table thead {
+            background: rgba(99, 102, 241, 0.1);
+            border-bottom: 2px solid var(--border);
+        }
+
+        .results-table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .results-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .results-table tr:hover {
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .score-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .score-badge.high {
+            background: rgba(16, 185, 129, 0.2);
+            color: #065f46;
+        }
+
+        .score-badge.medium {
+            background: rgba(251, 191, 36, 0.2);
+            color: #78350f;
+        }
+
+        .score-badge.low {
+            background: rgba(239, 68, 68, 0.2);
+            color: #7f1d1d;
+        }
+
+        .batch-progress {
+            margin: 1.5rem 0;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            text-align: center;
+        }
+
+        .export-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .export-btn:hover {
+            background: #059669;
+        }
+
+        @media (max-width: 768px) {
+            .upload-grid { grid-template-columns: 1fr; }
+            .header h1 { font-size: 2rem; }
+            .navbar-content { flex-direction: column; gap: 1rem; }
+            .results-table { font-size: 0.75rem; }
+            .results-table th, .results-table td { padding: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- LOGIN PAGE -->
+    <div class="login-container" id="loginPage">
+        <div class="login-box">
+            <div class="login-header">
+                <h1>📋 Resume Matcher</h1>
+                <p style="color: var(--text-light);">AI-Powered Resume Matching</p>
+            </div>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div id="loginMessage" class="form-message"></div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="loginEmail" class="form-input" placeholder="your@email.com" value="test@test.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" value="test123" required>
+                </div>
+                <button type="submit" class="form-submit" id="loginSubmitBtn">Sign In</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div class="app-hidden" id="mainApp">
+        <div class="navbar">
+            <div class="navbar-content">
+                <div class="navbar-brand">📋 Resume Matcher</div>
+                <div class="user-info">
+                    <span class="user-name" id="userNameDisplay">User</span>
+                    <button class="logout-btn" onclick="handleLogout()">Logout</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="header">
+                <h1>Resume-JD Matcher</h1>
+                <p>Match resumes with job descriptions using AI</p>
+            </div>
+
+            <div class="mode-toggle">
+                <button class="mode-btn active" onclick="switchMode('single')" id="singleModeBtn">📄 Single Match</button>
+                <button class="mode-btn" onclick="switchMode('batch')" id="batchModeBtn">📋 Batch Process</button>
+            </div>
+
+            <div class="upload-section single-section">
+                <div style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem;">📋 Upload</div>
+                <div class="upload-grid">
+                    <div>
+                        <div class="upload-card" onclick="triggerFileInput('resume')">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">📄</div>
+                            <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Resume</label>
+                            <p style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 1rem;">PDF, DOCX, or TXT</p>
+                            <button type="button" class="upload-btn">Choose File</button>
+                            <input type="file" id="resumeFile" class="file-input" accept=".pdf,.docx,.doc,.txt" onchange="handleFileSelect('resume', event)">
+                        </div>
+                        <div id="resumeFileInfo" class="file-info" style="display: none;"></div>
+                        <div style="margin-top: 1.5rem;">
+                            <label style="font-weight: 600; display: block; margin-bottom: 0.5rem; font-size: 0.875rem;">Or paste text</label>
+                            <textarea id="resumeText" class="textarea" placeholder="Paste resume text here..."></textarea>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="upload-card" onclick="triggerFileInput('jd')">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🎯</div>
+                            <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Job Description</label>
+                            <p style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 1rem;">PDF, DOCX, or TXT</p>
+                            <button type="button" class="upload-btn">Choose File</button>
+                            <input type="file" id="jdFile" class="file-input" accept=".pdf,.docx,.doc,.txt" onchange="handleFileSelect('jd', event)">
+                        </div>
+                        <div id="jdFileInfo" class="file-info" style="display: none;"></div>
+                        <div style="margin-top: 1.5rem;">
+                            <label style="font-weight: 600; display: block; margin-bottom: 0.5rem; font-size: 0.875rem;">Or paste text</label>
+                            <textarea id="jdText" class="textarea" placeholder="Paste job description here..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn-primary" id="analyzeSingleBtn" onclick="analyzeSingle()" disabled>
+                        <span>🔍 Analyze</span>
+                    </button>
+                    <button class="btn-secondary" onclick="clearSingleForm()">Clear</button>
+                </div>
+            </div>
+
+            <!-- BATCH UPLOAD SECTION -->
+            <div class="upload-section batch-section" id="batchSection">
+                <div style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem;">📋 Batch Process</div>
+                
+                <!-- JD Section -->
+                <div style="margin-bottom: 2rem;">
+                    <label style="font-weight: 600; display: block; margin-bottom: 0.75rem; font-size: 0.95rem;">Job Description (Required)</label>
+                    <div class="upload-card" onclick="triggerFileInput('batch-jd')">
+                        <div style="font-size: 2rem; margin-bottom: 1rem;">🎯</div>
+                        <p style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 1rem;">PDF, DOCX, or TXT</p>
+                        <button type="button" class="upload-btn">Choose File</button>
+                        <input type="file" id="batchJdFile" class="file-input" accept=".pdf,.docx,.doc,.txt" onchange="handleFileSelect('batch-jd', event)">
+                    </div>
+                    <div id="batchJdInfo" class="file-info" style="display: none;"></div>
+                </div>
+
+                <!-- Resumes Section -->
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="font-weight: 600; display: block; margin-bottom: 0.75rem; font-size: 0.95rem;">Resumes (Multiple Files)</label>
+                    <div class="batch-upload-card" onclick="triggerFileInput('batch-resumes')">
+                        <div style="font-size: 2rem; margin-bottom: 1rem;">📄</div>
+                        <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Upload Resume Files</label>
+                        <p style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 1rem;">Multiple PDF, DOCX, or TXT files</p>
+                        <button type="button" class="upload-btn">Choose Files</button>
+                        <input type="file" id="batchResumesFile" class="file-input" accept=".pdf,.docx,.doc,.txt" multiple onchange="handleBatchFilesSelect(event)">
+                    </div>
+                    
+                    <div id="batchFilesList" class="file-list" style="display: none;">
+                        <div style="font-weight: 600; margin-bottom: 0.5rem; font-size: 0.875rem;">Selected Files (<span id="fileCount">0</span>)</div>
+                        <div id="filesContainer"></div>
+                    </div>
+                </div>
+
+                <div class="batch-buttons">
+                    <button class="btn-primary" id="processBatchBtn" onclick="processBatch()" disabled>
+                        <span>⚡ Process Batch</span>
+                    </button>
+                    <button class="btn-secondary" onclick="clearBatchForm()">Clear All</button>
+                </div>
+            </div>
+
+            <!-- LOADING -->
+            <div class="loading-container" id="loadingContainer">
+                <div class="loading-spinner"></div>
+                <h3 id="loadingText" style="margin-top: 1rem;">Processing...</h3>
+                <div class="batch-progress" id="batchProgress" style="display: none; width: 100%; max-width: 400px; margin: 1rem auto 0;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text"><span id="progressCount">0</span>/<span id="progressTotal">0</span> completed</div>
+                </div>
+            </div>
+
+            <!-- RESULTS -->
+            <div class="results-section" id="resultsSection">
+                <div id="messageContainer"></div>
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab(0)">📊 Results</button>
+                    <button class="tab-btn" onclick="switchTab(1)">📄 Data</button>
+                </div>
+                
+                <div class="tab-content active">
+                    <h2 style="margin-bottom: 2rem;">Analysis Results</h2>
+                    <div id="scoreGrid" class="score-grid"></div>
+                    <div id="analysisDetails"></div>
+                </div>
+
+                <div class="tab-content">
+                    <h2 style="margin-bottom: 2rem;">Extracted Data</h2>
+                    <div id="extractedData"></div>
+                </div>
+            </div>
+
+            <!-- BATCH RESULTS -->
+            <div class="results-section" id="batchResultsSection" style="display: none;">
+                <div id="batchMessageContainer"></div>
+                <div style="background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 20px 25px rgba(0, 0, 0, 0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h2>Batch Results</h2>
+                        <button class="export-btn" onclick="exportBatchResults()">📥 Export CSV</button>
+                    </div>
+                    <div id="batchResultsTable"></div>
+                </div>
+            </div>
+
+            <button class="btn-secondary" id="backBtn" onclick="goBack()" style="display: none; margin-top: 2rem;">← Back</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api';
+        let currentToken = localStorage.getItem('token');
+        let currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        let currentResults = null;
+        let currentMode = 'single';
+        let batchFiles = [];
+        let batchJdText = '';
+
+        // Clear invalid tokens on page load (due to SECRET_KEY changes)
+        if (currentToken) {
+            try {
+                // Try to verify token format - if it fails, clear localStorage
+                const parts = currentToken.split('.');
+                if (parts.length !== 3) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    currentToken = null;
+                    currentUser = {};
+                }
+            } catch (e) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                currentToken = null;
+                currentUser = {};
+            }
+        }
+
+        // Force clear old tokens (fix for SECRET_KEY issue on 2024-01-19)
+        // Comment out after first use once new tokens are created
+        try {
+            const testToken = localStorage.getItem('token');
+            if (testToken && testToken.includes('test@gmail')) {
+                // Old token from test user with gmail - clear it
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                currentToken = null;
+                currentUser = {};
+                console.log('Cleared old test token');
+            }
+        } catch (e) {}
+
+        if (currentToken) showApp();
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const btn = document.getElementById('loginSubmitBtn');
+            const msgDiv = document.getElementById('loginMessage');
+
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    msgDiv.className = 'form-message error';
+                    msgDiv.textContent = data.detail || 'Login failed';
+                    btn.disabled = false;
+                    return;
+                }
+
+                localStorage.setItem('token', data.access_token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                currentToken = data.access_token;
+                currentUser = data.user;
+                showApp();
+            } catch (error) {
+                msgDiv.className = 'form-message error';
+                msgDiv.textContent = 'Connection error: ' + error.message;
+                btn.disabled = false;
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            location.reload();
+        }
+
+        function showApp() {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('mainApp').classList.remove('app-hidden');
+            document.getElementById('userNameDisplay').textContent = currentUser.name || 'User';
+        }
+
+        function triggerFileInput(type) {
+            const inputId = { 
+                'resume': 'resumeFile', 
+                'jd': 'jdFile',
+                'batch-jd': 'batchJdFile',
+                'batch-resumes': 'batchResumesFile'
+            }[type];
+            if (inputId) document.getElementById(inputId).click();
+        }
+
+        async function handleFileSelect(type, event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            try {
+                const text = await extractTextFromFile(file);
+                
+                if (type === 'resume') {
+                    document.getElementById('resumeText').value = text;
+                    document.getElementById('resumeFileInfo').textContent = `✓ Loaded: ${file.name}`;
+                    document.getElementById('resumeFileInfo').style.display = 'block';
+                } else {
+                    document.getElementById('jdText').value = text;
+                    document.getElementById('jdFileInfo').textContent = `✓ Loaded: ${file.name}`;
+                    document.getElementById('jdFileInfo').style.display = 'block';
+                }
+                updateAnalyzeBtn();
+            } catch (error) {
+                showMessage(`Error reading ${file.name}: ${error.message}`, 'error');
+            }
+        }
+
+        async function extractTextFromFile(file) {
+            const ext = file.name.split('.').pop().toLowerCase();
+
+            if (ext === 'pdf') {
+                return await extractTextFromPDF(file);
+            } else if (['docx', 'doc'].includes(ext)) {
+                return await extractTextFromDOCX(file);
+            } else if (ext === 'txt') {
+                return await file.text();
+            } else {
+                throw new Error(`Unsupported format: ${ext}`);
+            }
+        }
+
+        async function extractTextFromPDF(file) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            const pdf = await pdfjsLib.getDocument(await file.arrayBuffer()).promise;
+            let text = '';
+
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const content = await page.getTextContent();
+                text += content.items.map(item => item.str).join(' ') + '\n';
+            }
+
+            return text.trim() || 'No text found in PDF';
+        }
+
+        async function extractTextFromDOCX(file) {
+            const result = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
+            return result.value || 'No text found in file';
+        }
+
+        function updateAnalyzeBtn() {
+            const hasResume = document.getElementById('resumeText').value.trim().length > 20;
+            const hasJd = document.getElementById('jdText').value.trim().length > 20;
+            document.getElementById('analyzeSingleBtn').disabled = !(hasResume && hasJd);
+        }
+
+        async function analyzeSingle() {
+            const resume = document.getElementById('resumeText').value.trim();
+            const jd = document.getElementById('jdText').value.trim();
+
+            if (!resume || !jd) {
+                showMessage('Please provide both resume and job description', 'error');
+                return;
+            }
+
+            showLoading('Analyzing match...');
+
+            try {
+                const response = await fetch(`${API_URL}/match/single?token=${currentToken}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ resume_text: resume, jd_text: jd })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    hideLoading();
+                    showMessage(data.detail || 'Analysis failed', 'error');
+                    return;
+                }
+
+                currentResults = { ...data.data, resume: data.resume, jd: data.jd };
+                displayResults(data.data);
+                hideLoading();
+                showResults();
+                showMessage('✅ Analysis complete!', 'success');
+            } catch (error) {
+                hideLoading();
+                showMessage('Error: ' + error.message, 'error');
+            }
+        }
+
+        function displayResults(results) {
+            const { criteriaAnalysis, overallScore, recommendations } = results;
+            const criteria = criteriaAnalysis;
+
+            const scoreHtml = `
+                <div class="score-card">
+                    <div class="score-value">${overallScore}</div>
+                    <div class="score-label">Overall</div>
+                </div>
+                <div class="score-card">
+                    <div class="score-value">${criteria.experienceMatch.percentage}%</div>
+                    <div class="score-label">Experience</div>
+                </div>
+                <div class="score-card">
+                    <div class="score-value">${criteria.educationMatch.percentage}%</div>
+                    <div class="score-label">Education</div>
+                </div>
+                <div class="score-card">
+                    <div class="score-value">${criteria.skillsMatch.percentage}%</div>
+                    <div class="score-label">Skills</div>
+                </div>
+            `;
+
+            document.getElementById('scoreGrid').innerHTML = scoreHtml;
+
+            const details = `
+                <h3 style="margin: 1.5rem 0 1rem 0;">Analysis Details</h3>
+                <div style="margin-bottom: 1.5rem; background: #f9fafb; padding: 1.5rem; border-radius: 8px;">
+                    <h4 style="color: var(--primary); margin-bottom: 0.5rem;">📌 Experience Match</h4>
+                    <p>${criteria.experienceMatch.details}</p>
+                </div>
+                <div style="margin-bottom: 1.5rem; background: #f9fafb; padding: 1.5rem; border-radius: 8px;">
+                    <h4 style="color: var(--primary); margin-bottom: 0.5rem;">🎓 Education Match</h4>
+                    <p>${criteria.educationMatch.details}</p>
+                </div>
+                <div style="margin-bottom: 1.5rem; background: #f9fafb; padding: 1.5rem; border-radius: 8px;">
+                    <h4 style="color: var(--primary); margin-bottom: 0.5rem;">💻 Skills Match</h4>
+                    <p>${criteria.skillsMatch.details}</p>
+                </div>
+                <h3 style="margin: 1.5rem 0 1rem 0;">Recommendations</h3>
+                ${recommendations.map(r => `<p style="margin-bottom: 0.75rem;">💡 ${r}</p>`).join('')}
+            `;
+
+            document.getElementById('analysisDetails').innerHTML = details;
+
+            const resume = currentResults.resume || {};
+            const jd = currentResults.jd || {};
+
+            const dataHtml = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                    <div class="data-section">
+                        <h4>📄 Resume</h4>
+                        <div class="data-item"><strong>Role:</strong> ${resume.role || 'N/A'}</div>
+                        <div class="data-item"><strong>Experience:</strong> ${resume.totalYearsExperience || 0} years</div>
+                        <div class="data-item"><strong>Education:</strong> ${resume.education?.[0]?.degree || 'N/A'}</div>
+                        <div class="data-item"><strong>Skills:</strong> ${resume.skills?.length || 0}</div>
+                        ${resume.skills && resume.skills.length > 0 ? `
+                            <div style="margin-top: 1rem;">
+                                ${resume.skills.map(s => `<span class="skill-tag">${typeof s === 'object' ? s.name : s}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="data-section">
+                        <h4>🎯 Job Description</h4>
+                        <div class="data-item"><strong>Title:</strong> ${jd.jobTitle || 'N/A'}</div>
+                        <div class="data-item"><strong>Experience Required:</strong> ${jd.minExperienceYears || 0} years</div>
+                        <div class="data-item"><strong>Education Required:</strong> ${jd.requiredEducation || 'N/A'}</div>
+                        <div class="data-item"><strong>Required Skills:</strong> ${jd.requiredSkills?.length || 0}</div>
+                        ${jd.requiredSkills && jd.requiredSkills.length > 0 ? `
+                            <div style="margin-top: 1rem;">
+                                ${jd.requiredSkills.map(s => `<span class="skill-tag">${typeof s === 'object' ? s.name : s}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('extractedData').innerHTML = dataHtml;
+        }
+
+        function showLoading(text) {
+            document.getElementById('loadingText').textContent = text;
+            document.getElementById('loadingContainer').classList.add('show');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingContainer').classList.remove('show');
+        }
+
+        function showResults() {
+            document.getElementById('resultsSection').classList.add('show');
+            document.getElementById('backBtn').style.display = 'block';
+            setTimeout(() => document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' }), 100);
+        }
+
+        function showMessage(text, type) {
+            const container = document.getElementById('messageContainer');
+            container.innerHTML = `<div class="message ${type}">${text}</div>`;
+            setTimeout(() => container.innerHTML = '', 5000);
+        }
+
+        function switchTab(index) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-btn')[index].classList.add('active');
+            document.querySelectorAll('.tab-content')[index].classList.add('active');
+        }
+
+        function clearSingleForm() {
+            document.getElementById('resumeText').value = '';
+            document.getElementById('jdText').value = '';
+            document.getElementById('resumeFile').value = '';
+            document.getElementById('jdFile').value = '';
+            document.getElementById('resumeFileInfo').style.display = 'none';
+            document.getElementById('jdFileInfo').style.display = 'none';
+            updateAnalyzeBtn();
+        }
+
+        function goBack() {
+            document.getElementById('resultsSection').classList.remove('show');
+            document.getElementById('batchResultsSection').style.display = 'none';
+            document.getElementById('backBtn').style.display = 'none';
+            document.getElementById('messageContainer').innerHTML = '';
+            document.getElementById('batchMessageContainer').innerHTML = '';
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            const singleSection = document.querySelector('.single-section');
+            const batchSection = document.getElementById('batchSection');
+            const singleModeBtn = document.getElementById('singleModeBtn');
+            const batchModeBtn = document.getElementById('batchModeBtn');
+
+            if (mode === 'single') {
+                singleSection.classList.remove('hide');
+                batchSection.classList.remove('show');
+                singleModeBtn.classList.add('active');
+                batchModeBtn.classList.remove('active');
+            } else {
+                singleSection.classList.add('hide');
+                batchSection.classList.add('show');
+                singleModeBtn.classList.remove('active');
+                batchModeBtn.classList.add('active');
+            }
+            goBack();
+        }
+
+        function handleBatchFilesSelect(event) {
+            const files = Array.from(event.target.files);
+            if (!files.length) return;
+
+            batchFiles = files;
+            updateBatchFilesList();
+            updateProcessBatchBtn();
+        }
+
+        function updateBatchFilesList() {
+            const container = document.getElementById('filesContainer');
+            const listDiv = document.getElementById('batchFilesList');
+            const count = document.getElementById('fileCount');
+
+            if (batchFiles.length === 0) {
+                listDiv.style.display = 'none';
+                return;
+            }
+
+            listDiv.style.display = 'block';
+            count.textContent = batchFiles.length;
+            container.innerHTML = batchFiles.map((file, idx) => `
+                <div class="file-item">
+                    <span class="file-item-name">📄 ${file.name}</span>
+                    <button type="button" class="file-remove-btn" onclick="removeBatchFile(${idx})">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        function removeBatchFile(index) {
+            batchFiles.splice(index, 1);
+            updateBatchFilesList();
+            updateProcessBatchBtn();
+        }
+
+        async function handleFileSelect(type, event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            try {
+                const text = await extractTextFromFile(file);
+                
+                if (type === 'batch-jd') {
+                    batchJdText = text;
+                    document.getElementById('batchJdInfo').textContent = `✓ Loaded: ${file.name}`;
+                    document.getElementById('batchJdInfo').style.display = 'block';
+                } else if (type === 'resume') {
+                    document.getElementById('resumeText').value = text;
+                    document.getElementById('resumeFileInfo').textContent = `✓ Loaded: ${file.name}`;
+                    document.getElementById('resumeFileInfo').style.display = 'block';
+                } else if (type === 'jd') {
+                    document.getElementById('jdText').value = text;
+                    document.getElementById('jdFileInfo').textContent = `✓ Loaded: ${file.name}`;
+                    document.getElementById('jdFileInfo').style.display = 'block';
+                }
+                updateAnalyzeBtn();
+                updateProcessBatchBtn();
+            } catch (error) {
+                showMessage(`Error reading ${file.name}: ${error.message}`, 'error');
+            }
+        }
+
+        function updateProcessBatchBtn() {
+            const hasJd = batchJdText.trim().length > 20;
+            const hasResumes = batchFiles.length > 0;
+            document.getElementById('processBatchBtn').disabled = !(hasJd && hasResumes);
+        }
+
+        async function processBatch() {
+            if (!batchJdText || batchFiles.length === 0) {
+                showBatchMessage('Please provide JD and at least one resume', 'error');
+                return;
+            }
+
+            showLoading(`Processing ${batchFiles.length} resumes...`);
+            document.getElementById('batchProgress').style.display = 'block';
+
+            const results = [];
+            let completed = 0;
+
+            for (let i = 0; i < batchFiles.length; i++) {
+                try {
+                    const resumeText = await extractTextFromFile(batchFiles[i]);
+                    
+                    const response = await fetch(`${API_URL}/match/single?token=${currentToken}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ resume_text: resumeText, jd_text: batchJdText })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        results.push({
+                            filename: batchFiles[i].name,
+                            overallScore: data.data.overallScore,
+                            experienceScore: data.data.criteriaAnalysis.experienceMatch.percentage,
+                            educationScore: data.data.criteriaAnalysis.educationMatch.percentage,
+                            skillsScore: data.data.criteriaAnalysis.skillsMatch.percentage,
+                            data: data.data,
+                            status: 'success'
+                        });
+                    } else {
+                        results.push({
+                            filename: batchFiles[i].name,
+                            overallScore: 0,
+                            status: 'error',
+                            error: data.detail || 'Analysis failed'
+                        });
+                    }
+                } catch (error) {
+                    results.push({
+                        filename: batchFiles[i].name,
+                        overallScore: 0,
+                        status: 'error',
+                        error: error.message
+                    });
+                }
+
+                completed++;
+                updateBatchProgress(completed, batchFiles.length);
+            }
+
+            hideLoading();
+            displayBatchResults(results);
+            showBatchResultsSection();
+            showBatchMessage(`✅ Batch processing complete! ${results.filter(r => r.status === 'success').length}/${results.length} successful`, 'success');
+        }
+
+        function updateBatchProgress(current, total) {
+            const percent = Math.round((current / total) * 100);
+            document.getElementById('progressFill').style.width = percent + '%';
+            document.getElementById('progressCount').textContent = current;
+            document.getElementById('progressTotal').textContent = total;
+        }
+
+        function displayBatchResults(results) {
+            const tableHtml = `
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>Resume</th>
+                            <th>Overall Score</th>
+                            <th>Experience</th>
+                            <th>Education</th>
+                            <th>Skills</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${results.map((r, idx) => `
+                            <tr>
+                                <td style="font-weight: 500;">${r.filename}</td>
+                                <td><span class="score-badge ${r.overallScore >= 70 ? 'high' : r.overallScore >= 50 ? 'medium' : 'low'}">${r.overallScore}%</span></td>
+                                <td>${r.experienceScore ? r.experienceScore + '%' : '—'}</td>
+                                <td>${r.educationScore ? r.educationScore + '%' : '—'}</td>
+                                <td>${r.skillsScore ? r.skillsScore + '%' : '—'}</td>
+                                <td>
+                                    ${r.status === 'success' ? 
+                                        `<span style="color: var(--success); font-weight: 600;">✓ Success</span>` :
+                                        `<span style="color: var(--danger); font-weight: 600;">✗ ${r.error}</span>`
+                                    }
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('batchResultsTable').innerHTML = tableHtml;
+            window.batchResults = results;
+        }
+
+        function showBatchResultsSection() {
+            document.getElementById('batchResultsSection').style.display = 'block';
+            document.getElementById('backBtn').style.display = 'block';
+            setTimeout(() => document.getElementById('batchResultsSection').scrollIntoView({ behavior: 'smooth' }), 100);
+        }
+
+        function showBatchMessage(text, type) {
+            const container = document.getElementById('batchMessageContainer');
+            container.innerHTML = `<div class="message ${type}">${text}</div>`;
+            setTimeout(() => container.innerHTML = '', 5000);
+        }
+
+        function clearBatchForm() {
+            batchFiles = [];
+            batchJdText = '';
+            document.getElementById('batchJdFile').value = '';
+            document.getElementById('batchResumesFile').value = '';
+            document.getElementById('batchJdInfo').style.display = 'none';
+            document.getElementById('batchFilesList').style.display = 'none';
+            updateProcessBatchBtn();
+        }
+
+        function exportBatchResults() {
+            if (!window.batchResults || window.batchResults.length === 0) {
+                showBatchMessage('No results to export', 'error');
+                return;
+            }
+
+            const csv = [
+                ['Resume', 'Overall Score', 'Experience', 'Education', 'Skills', 'Status'].join(','),
+                ...window.batchResults.map(r => 
+                    [
+                        `"${r.filename}"`,
+                        r.overallScore,
+                        r.experienceScore || '—',
+                        r.educationScore || '—',
+                        r.skillsScore || '—',
+                        r.status
+                    ].join(',')
+                )
+            ].join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `batch-results-${Date.now()}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            showBatchMessage('✅ Results exported!', 'success');
+        }
+    </script>
+</body>
+</html>
