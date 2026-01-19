@@ -1,9 +1,3 @@
-"""
-Ultra-robust JSON parsing for FastAPI backend
-Handles severely malformed JSON from LLM responses
-FIXED: Truncated JSON completion and aggressive recovery
-"""
-
 import json
 import re
 from datetime import datetime
